@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Misi Ulang Tahun Suami</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Baloo+2:wght@500;700;800&display=swap">
+<style>
+/* Layout: satu layar arkade di tengah, kartu misi selebar ponsel, malam pesta berwarna plum dengan kilau emas */
+:root {
+  --night: #1d1533;
+  --card: #2b2150;
+  --card-2: #382a66;
+  --gold: #ffc94a;
+  --coral: #ff7a8a;
+  --mint: #7fe0c3;
+  --ink: #fff4e3;
+  --muted: #bcaedf;
+  --font-display: "Bagel Fat One", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: radial-gradient(120% 80% at 50% 0%, #3a2470 0%, var(--night) 60%);
+  background-color: var(--night);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px;
+  box-sizing: border-box;
+  display: flex; justify-content: center; align-items: flex-start;
+  overflow-x: hidden;
+}
+#app {
+  width: 100%; max-width: 520px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+h1, h2 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: clamp(30px, 8vw, 44px); color: var(--gold); }
+h2 { font-size: clamp(24px, 6vw, 32px); color: var(--gold); }
+p { margin: 0; line-height: 1.5; }
+.muted { color: var(--muted); }
+.panel {
+  background: var(--card); border-radius: 22px; padding: 22px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 10px 0 #120c22;
+}
+.btn {
+  font-family: var(--font-display); font-size: 22px; letter-spacing: .5px;
+  border: 0; border-radius: 16px; padding: 14px 22px; cursor: pointer;
+  background: var(--gold); color: #3a1f00; box-shadow: 0 6px 0 #b9811a;
+  transition: transform .08s;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b9811a; }
+.btn:focus-visible, .opt:focus-visible, .candle:focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; }
+.btn.ghost { background: var(--card-2); color: var(--ink); box-shadow: 0 6px 0 #1a1235; }
+.hud {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-weight: 800; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+}
+.hud .hearts { font-size: 20px; letter-spacing: 2px; }
+.hud .mute { background: none; border: 0; font-size: 20px; cursor: pointer; padding: 4px; }
+.missions { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.missions li { display: flex; gap: 12px; align-items: center; background: var(--card-2); border-radius: 14px; padding: 10px 14px; }
+.missions b { color: var(--gold); font-family: var(--font-display); font-weight: 400; font-size: 20px; min-width: 1.4em; }
+.big-emoji { font-size: 64px; text-align: center; line-height: 1; }
+.caption { min-height: 1.6em; text-align: center; font-weight: 800; color: var(--coral); }
+.stat { font-variant-numeric: tabular-nums; color: var(--ink); }
+
+/* Level 1 */
+.stage { position: relative; border-radius: 22px; overflow: hidden; background: linear-gradient(#2f2260, #1b1438); box-shadow: 0 10px 0 #120c22; }
+canvas#game { display: block; width: 100%; height: min(62vh, 520px); touch-action: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 15px; justify-content: center; color: var(--muted); }
+
+/* Level 2 */
+.cake-wrap { display: flex; flex-direction: column; align-items: center; padding: 30px 8px 16px; }
+.candles { display: flex; gap: clamp(6px, 2vw, 14px); justify-content: center; flex-wrap: nowrap; }
+.candle {
+  position: relative; width: clamp(22px, 7vw, 30px); height: 70px; border: 0; padding: 0; cursor: pointer;
+  background: repeating-linear-gradient(135deg, var(--ink) 0 8px, var(--coral) 8px 16px);
+  border-radius: 6px 6px 2px 2px; touch-action: manipulation;
+}
+.candle::before { content: ""; position: absolute; left: 50%; top: -8px; width: 2px; height: 8px; background: #3a2b20; transform: translateX(-50%); }
+.candle .flame {
+  position: absolute; left: 50%; top: -36px; width: 18px; height: 28px; transform: translateX(-50%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 70%, #fff7c2 0 25%, var(--gold) 45%, #ff8a3d 80%);
+  box-shadow: 0 0 18px 6px rgba(255, 190, 70, .55);
+  animation: flicker .25s infinite alternate;
+}
+.candle.out .flame { display: none; }
+.candle.out::after { content: "~"; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 22px; animation: smoke 1s forwards; }
+.candle.relit .flame { animation: pop .3s, flicker .25s .3s infinite alternate; }
+.cake {
+  width: min(100%, 380px); height: 110px; margin-top: -2px;
+  background: linear-gradient(var(--coral) 0 26px, #f6e2c4 26px 34px, #b0643c 34px 70px, #f6e2c4 70px 78px, #8d4a2a 78px);
+  border-radius: 14px 14px 8px 8px; box-shadow: 0 10px 0 #120c22;
+}
+@keyframes flicker { from { transform: translateX(-50%) scale(1, 1) rotate(-3deg); } to { transform: translateX(-50%) scale(.92, 1.08) rotate(3deg); } }
+@keyframes pop { from { transform: translateX(-50%) scale(2.2); } }
+@keyframes smoke { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -20px); } }
+.timerbar { height: 12px; background: var(--card-2); border-radius: 8px; overflow: hidden; }
+.timerbar i { display: block; height: 100%; background: var(--mint); width: 100%; transition: width .2s linear; }
+
+/* Level 3 */
+.opts { display: grid; gap: 10px; }
+.opt {
+  text-align: left; font: 700 17px/1.35 var(--font-body); color: var(--ink);
+  background: var(--card-2); border: 2px solid transparent; border-radius: 14px; padding: 12px 14px; cursor: pointer;
+}
+.opt:hover { border-color: var(--gold); }
+.opt.wrong { border-color: var(--coral); animation: shake .35s; opacity: .6; }
+.opt.right { border-color: var(--mint); background: #2c5a52; }
+@keyframes shake { 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-4px); } }
+.qnum { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); }
+.q { font-size: 21px; font-weight: 800; line-height: 1.3; }
+
+/* Level 4 */
+.arena { position: relative; height: min(52vh, 400px); border-radius: 22px; background: var(--card); box-shadow: 0 10px 0 #120c22; overflow: hidden; }
+.arena .btn { position: absolute; transition: left .18s ease-out, top .18s ease-out, transform .1s; white-space: nowrap; }
+.arena .btn.tired { background: var(--mint); color: #0f3a30; box-shadow: 0 6px 0 #3f9e83; animation: wobble 1s infinite; }
+@keyframes wobble { 50% { transform: rotate(-4deg) scale(1.05); } }
+
+/* Final */
+#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.letter { background: var(--ink); color: #3a2450; border-radius: 22px; padding: 26px 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 0 #120c22; position: relative; z-index: 6; }
+.letter h1 { color: #c23a5a; }
+.letter p { font-size: 18px; }
+.letter .sign { font-weight: 800; text-align: right; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row .btn { flex: 1 1 160px; }
+.toast { position: fixed; left: 50%; top: calc(18px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); background: var(--coral); color: #2a0d14; font-weight: 800; padding: 8px 16px; border-radius: 999px; z-index: 10; animation: toast 1.4s forwards; white-space: nowrap; }
+@keyframes toast { 0% { opacity: 0; transform: translate(-50%, -10px); } 15%, 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti" hidden></canvas>
+<main id="app"></main>
+
+<script>
+/* ===== Ubah bagian ini untuk personalisasi ===== */
+const CONFIG = {
+  nama: "Suamiku Sayang",
+  dari: "Istrimu yang paling cantik sedunia",
+  pesan: [
+    "Selamat ulang tahun, sayang! Terima kasih sudah jadi suami yang sabar, lucu, dan selalu bikin hari-hariku lebih seru.",
+    "Semoga sehat terus, rezekinya lancar, makin ganteng (iya, itu mungkin), dan makin sayang sama aku setiap hari.",
+    "Kamu sudah lulus semua misi. Hadiah aslinya? Peluk dariku, sekarang juga. Ayo ke sini!"
+  ]
+};
+/* ============================================== */
+
+const app = document.getElementById("app");
+let lives = 3, muted = false, cleanup = null, currentLevel = 0;
+
+/* ---------- Suara ---------- */
+let actx = null;
+function ac() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return actx; }
+function beep(freq, dur = 0.12, type = "square", vol = 0.06, when = 0) {
+  if (muted) return; const a = ac(); if (!a) return;
+  const t = a.currentTime + when, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const sfx = {
+  good: () => { beep(660, .08); beep(990, .1, "square", .05, .07); },
+  bad: () => { beep(180, .25, "sawtooth", .07); },
+  blow: () => beep(300 + Math.random() * 200, .06, "triangle", .05),
+  win: () => [523, 659, 784, 1046].forEach((f, i) => beep(f, .15, "square", .06, i * .1)),
+};
+function playBirthday() {
+  const N = { G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784 };
+  const song = [["G4",.5],["G4",.5],["A4",1],["G4",1],["C5",1],["B4",2],
+                ["G4",.5],["G4",.5],["A4",1],["G4",1],["D5",1],["C5",2],
+                ["G4",.5],["G4",.5],["G5",1],["E5",1],["C5",1],["B4",1],["A4",2],
+                ["F5",.5],["F5",.5],["E5",1],["C5",1],["D5",1],["C5",2.5]];
+  let t = 0; const beat = 0.36;
+  song.forEach(([n, d]) => { beep(N[n], d * beat * .95, "triangle", .09, t); t += d * beat; });
+}
+
+/* ---------- Util ---------- */
+const hearts = () => "❤️".repeat(Math.max(0, lives)) + "🖤".repeat(Math.max(0, 3 - lives));
+function hud(label) {
+  return `<div class="hud"><span>${label}</span><span class="hearts" id="hearts">${hearts()}</span>
+    <button class="mute" id="mute" aria-label="Suara">${muted ? "🔇" : "🔊"}</button></div>`;
+}
+function bindHud() {
+  const m = document.getElementById("mute");
+  if (m) m.onclick = () => { muted = !muted; m.textContent = muted ? "🔇" : "🔊"; };
+}
+function refreshHearts() { const h = document.getElementById("hearts"); if (h) h.textContent = hearts(); }
+function toast(msg) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 1400);
+}
+function show(html) {
+  if (cleanup) { cleanup(); cleanup = null; }
+  app.innerHTML = html; bindHud(); window.scrollTo(0, 0);
+}
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const shuffle = arr => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(v => v[1]);
+
+/* ---------- Layar awal ---------- */
+function start() {
+  currentLevel = 0;
+  show(`
+    <section class="panel">
+      <div class="big-emoji">🎁</div>
+      <h1>Misi Rahasia untuk ${CONFIG.nama}</h1>
+      <p>Ada hadiah ulang tahun yang dikunci rapat. Kuncinya cuma satu: lolos 4 tantangan di bawah ini. Gampang? Lihat saja nanti.</p>
+      <ul class="missions">
+        <li><b>1</b><span>Tangkap kado, hindari tagihan & brokoli</span></li>
+        <li><b>2</b><span>Tiup lilin ajaib yang suka nyala lagi</span></li>
+        <li><b>3</b><span>Kuis: seberapa kenal kamu sama istrimu?</span></li>
+        <li><b>4</b><span>Buka hadiahnya (kalau bisa)</span></li>
+      </ul>
+      <button class="btn" id="go">Mulai Misi</button>
+      <p class="muted" style="font-size:14px;text-align:center">Nyalakan suara biar makin seru 🔊</p>
+    </section>`);
+  document.getElementById("go").onclick = () => { ac(); sfx.win(); go(1); };
+}
+
+const LEVELS = {
+  1: { emoji: "🧺", title: "Tangkap Kadonya!", desc: "Geser keranjang (jari, mouse, atau tombol panah). Tangkap 25 barang enak. Kalau kena brokoli, tagihan, alarm Senin, atau kaos kaki bau, nyawamu berkurang.", run: level1 },
+  2: { emoji: "🕯️", title: "Tiup Lilinnya!", desc: "Ketuk lilin untuk meniupnya. Semua lilin harus padam bersamaan dalam 30 detik. Masalahnya, lilin ini lilin ajaib. Mereka bandel.", run: level2 },
+  3: { emoji: "🧠", title: "Kuis Suami Siaga", desc: "5 pertanyaan tentang istrimu. Salah jawab, nyawa berkurang. Jawab dengan hati-hati, karena jawabanmu dicatat selamanya.", run: level3 },
+  4: { emoji: "🎀", title: "Buka Hadiahmu", desc: "Tinggal satu langkah lagi. Cukup klik tombolnya. Semudah itu. Serius.", run: level4 },
+};
+function go(n) {
+  currentLevel = n; lives = 3; const L = LEVELS[n];
+  show(`
+    <section class="panel">
+      <div class="hud"><span>Misi ${n} dari 4</span><span></span><button class="mute" id="mute" aria-label="Suara">${muted ? "🔇" : "🔊"}</button></div>
+      <div class="big-emoji">${L.emoji}</div>
+      <h2>${L.title}</h2>
+      <p>${L.desc}</p>
+      <button class="btn" id="go">Siap!</button>
+    </section>`);
+  document.getElementById("go").onclick = () => L.run();
+}
+function fail(msg) {
+  sfx.bad();
+  show(`
+    <section class="panel">
+      <div class="big-emoji">😵‍💫</div>
+      <h2>Yah, gagal!</h2>
+      <p>${msg}</p>
+      <p class="muted">Tenang, istrimu masih sayang. Coba lagi ya.</p>
+      <button class="btn" id="retry">Coba Lagi</button>
+    </section>`);
+  document.getElementById("retry").onclick = () => go(currentLevel);
+}
+function passed(msg) {
+  sfx.win();
+  show(`
+    <section class="panel">
+      <div class="big-emoji">🏆</div>
+      <h2>Misi ${currentLevel} beres!</h2>
+      <p>${msg}</p>
+      <button class="btn" id="next">Lanjut</button>
+    </section>`);
+  document.getElementById("next").onclick = () => go(currentLevel + 1);
+}
+
+/* ---------- Level 1: Tangkap kado ---------- */
+function level1() {
+  const TARGET = 25;
+  show(`${hud("Misi 1 · Tangkap Kado")}
+    <div class="hud"><span>Skor <span class="stat" id="score">0</span> / ${TARGET}</span></div>
+    <div class="stage"><canvas id="game"></canvas></div>
+    <div class="caption" id="cap">Tangkap yang enak-enak!</div>
+    <div class="legend"><span>🎂🎁🍕☕ +1</span><span>💰 +3</span><span>🥦🧾⏰🧦 jangan!</span></div>`);
+  const cv = document.getElementById("game"), ctx = cv.getContext("2d");
+  const cap = document.getElementById("cap"), scoreEl = document.getElementById("score");
+  let W, H, dpr;
+  function size() {
+    dpr = window.devicePixelRatio || 1; W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  size(); window.addEventListener("resize", size);
+
+  const GOOD = [
+    { e: "🎂", p: 1, m: "Kue! Nyam." }, { e: "🎁", p: 1, m: "Kado!" }, { e: "🍕", p: 1, m: "Pizza gratis!" },
+    { e: "☕", p: 1, m: "Kopi pagi, mantap." }, { e: "🍜", p: 1, m: "Indomie tengah malam!" }, { e: "💰", p: 3, m: "Bonus gajian! +3" },
+  ];
+  const BAD = [
+    { e: "🥦", m: "Brokoli! Kata istri harus dihabisin." }, { e: "🧾", m: "Tagihan listrik datang!" },
+    { e: "⏰", m: "Alarm hari Senin. Sakit." }, { e: "🧦", m: "Kaos kaki siapa ini?!" },
+    { e: "🛒", m: "Istri: 'Sekalian beli ini ya…'" },
+  ];
+  let px = W / 2, tx = W / 2, score = 0, items = [], pops = [], spawnT = 0, last = performance.now(), raf, over = false, flash = 0;
+  const keys = {};
+  const kd = e => { keys[e.key] = true; if (e.key.startsWith("Arrow")) e.preventDefault(); };
+  const ku = e => { keys[e.key] = false; };
+  window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
+  const pm = e => { const r = cv.getBoundingClientRect(); tx = e.clientX - r.left; };
+  cv.addEventListener("pointermove", pm); cv.addEventListener("pointerdown", pm);
+
+  function spawn() {
+    const level = score / TARGET;
+    const bad = Math.random() < 0.3 + level * 0.25;
+    const it = bad ? pick(BAD) : (Math.random() < 0.08 ? GOOD[5] : pick(GOOD.slice(0, 5)));
+    items.push({ ...it, bad, x: 24 + Math.random() * (W - 48), y: -30, vy: 130 + Math.random() * 80 + level * 220, rot: Math.random() * 6, vr: (Math.random() - .5) * 4 });
+  }
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    if (keys.ArrowLeft) tx = px - 400 * dt * 2; if (keys.ArrowRight) tx = px + 400 * dt * 2;
+    tx = Math.max(30, Math.min(W - 30, tx)); px += (tx - px) * Math.min(1, dt * 14);
+    spawnT -= dt; if (spawnT <= 0) { spawn(); spawnT = Math.max(0.32, 0.85 - score * 0.02); }
+    const py = H - 46;
+    for (const it of items) {
+      it.y += it.vy * dt; it.rot += it.vr * dt;
+      if (!it.done && it.y > py - 26 && it.y < py + 20 && Math.abs(it.x - px) < 44) {
+        it.done = true;
+        if (it.bad) { lives--; refreshHearts(); sfx.bad(); flash = 0.3; cap.textContent = it.m; pops.push({ x: it.x, y: py - 40, t: 1, s: "-❤️" }); }
+        else { score += it.p; scoreEl.textContent = Math.min(score, TARGET); sfx.good(); cap.textContent = it.m; pops.push({ x: it.x, y: py - 40, t: 1, s: "+" + it.p }); }
+      }
+    }
+    items = items.filter(it => !it.done && it.y < H + 40);
+    ctx.clearRect(0, 0, W, H);
+    if (flash > 0) { ctx.fillStyle = `rgba(255,90,110,${flash})`; ctx.fillRect(0, 0, W, H); flash -= dt; }
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    for (const it of items) {
+      ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(Math.sin(it.rot) * .3);
+      ctx.font = "34px serif"; ctx.fillText(it.e, 0, 0); ctx.restore();
+    }
+    ctx.font = "30px serif"; ctx.fillText("😋", px, py - 28);
+    ctx.font = "46px serif"; ctx.fillText("🧺", px, py + 6);
+    for (const p of pops) {
+      p.y -= 50 * dt; p.t -= dt * 1.4;
+      ctx.globalAlpha = Math.max(0, p.t); ctx.font = "800 22px 'Baloo 2', sans-serif";
+      ctx.fillStyle = p.s.startsWith("+") ? "#7fe0c3" : "#ff7a8a"; ctx.fillText(p.s, p.x, p.y); ctx.globalAlpha = 1;
+    }
+    pops = pops.filter(p => p.t > 0);
+    if (lives <= 0 && !over) { over = true; setTimeout(() => fail("Keranjangmu kebanjiran brokoli dan tagihan. Hidup memang keras."), 400); return; }
+    if (score >= TARGET && !over) { over = true; setTimeout(() => passed("Keranjang penuh kado! Refleksmu masih oke untuk umur segini 😜"), 400); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+  cleanup = () => {
+    cancelAnimationFrame(raf); window.removeEventListener("resize", size);
+    window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku);
+  };
+}
+
+/* ---------- Level 2: Lilin ajaib ---------- */
+function level2() {
+  const COUNT = 9, TIME = 30;
+  show(`${hud("Misi 2 · Tiup Lilin")}
+    <section class="panel">
+      <div class="hud"><span>Sisa waktu <span class="stat" id="time">${TIME}</span> detik</span><span>Menyala <span class="stat" id="lit">${COUNT}</span></span></div>
+      <div class="timerbar"><i id="bar"></i></div>
+      <div class="cake-wrap"><div class="candles" id="candles"></div><div class="cake"></div></div>
+      <div class="caption" id="cap">Fuuuh! Ketuk lilinnya!</div>
+    </section>`);
+  const box = document.getElementById("candles"), cap = document.getElementById("cap");
+  const litEl = document.getElementById("lit"), timeEl = document.getElementById("time"), bar = document.getElementById("bar");
+  const TAUNTS = ["Hehe, nyala lagi 😈", "Lilin ajaib, bos!", "Kurang kenceng niupnya!", "Paru-parunya udah tua ya? 😜", "Ayo, dikit lagi!", "Lilinnya ngeyel kayak kamu"];
+  const candles = [];
+  for (let i = 0; i < COUNT; i++) {
+    const b = document.createElement("button"); b.className = "candle"; b.setAttribute("aria-label", "Lilin " + (i + 1));
+    b.innerHTML = '<span class="flame"></span>';
+    b.addEventListener("pointerdown", e => { e.preventDefault(); blow(b); });
+    b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); blow(b); } });
+    box.appendChild(b); candles.push(b);
+  }
+  let done = false; const t0 = performance.now();
+  const count = () => candles.filter(c => !c.classList.contains("out")).length;
+  function update() { litEl.textContent = count(); }
+  function blow(c) {
+    if (done || c.classList.contains("out")) return;
+    c.classList.add("out"); c.classList.remove("relit"); sfx.blow(); update();
+    if (count() === 0) { done = true; clearInterval(iv); clearInterval(tv); setTimeout(() => passed("Semua lilin padam! Make a wish dulu… sudah? Oke, lanjut!"), 500); }
+  }
+  const iv = setInterval(() => {
+    if (done) return;
+    const elapsed = (performance.now() - t0) / 1000;
+    const outs = candles.filter(c => c.classList.contains("out"));
+    if (!outs.length) return;
+    const chance = 0.45 + Math.min(0.35, elapsed / TIME * 0.35) + (outs.length >= COUNT - 2 ? 0.15 : 0);
+    if (Math.random() < chance) {
+      const c = pick(outs); c.classList.remove("out"); void c.offsetWidth; c.classList.add("relit");
+      beep(880, .05, "sine", .04); cap.textContent = pick(TAUNTS); update();
+    }
+  }, 850);
+  const tv = setInterval(() => {
+    const left = Math.max(0, TIME - (performance.now() - t0) / 1000);
+    timeEl.textContent = Math.ceil(left); bar.style.width = (left / TIME * 100) + "%";
+    if (left <= 0 && !done) { done = true; clearInterval(iv); clearInterval(tv); fail("Lilinnya menang. Kuenya keburu meleleh 🫠"); }
+  }, 100);
+  cleanup = () => { clearInterval(iv); clearInterval(tv); };
+}
+
+/* ---------- Level 3: Kuis ---------- */
+const QUIZ = [
+  { q: "Istri bilang “terserah”. Artinya apa?", a: "Ada satu jawaban benar, dan kamu harus menebaknya", w: ["Terserah beneran", "Waktunya tidur siang", "Pesan nasi padang, pasti aman"],
+    ok: "Tepat! Kamu sudah berpengalaman.", no: ["Salah besar. Terserah tidak pernah berarti terserah.", "Ini jebakan klasik, sayang."] },
+  { q: "Istri bertanya: “Aku gendutan ya?” Jawaban paling aman?", a: "“Kamu cantik banget hari ini.”", w: ["“Dikit sih.”", "“Sama kok kayak kemarin.”", "“Coba tanya timbangan.”"],
+    ok: "Jawaban penyelamat nyawa. Bagus!", no: ["Kamu tidur di sofa malam ini.", "Berani sekali kamu…"] },
+  { q: "Siapa yang selalu benar di rumah ini?", a: "Istri", w: ["Suami", "Google", "Kucing tetangga"],
+    ok: "Benar. Ini hukum alam.", no: ["Hmm, coba pikirkan lagi baik-baik.", "Itu jawaban yang berani. Dan salah."] },
+  { q: "Istri bilang “Aku nggak marah kok.” Apa yang harus kamu lakukan?", a: "Minta maaf dulu, cari tahu salahnya nanti", w: ["Lega, lanjut main game", "Tanya “Terus kenapa diam aja?”", "Pura-pura tidur"],
+    ok: "Instingmu tajam! Suami teladan.", no: ["Oh tidak. Itu justru tanda bahaya.", "Kesalahan pemula."] },
+  { q: "Hadiah apa yang paling disukai istrimu?", a: "Semua jawaban benar, asal dari kamu ❤️", w: ["Tas baru", "Liburan berdua", "Dibiarkan tidur sampai siang"],
+    ok: "Gombal, tapi benar 🥰", no: ["Hampir! Tapi ada jawaban yang lebih lengkap.", "Bagus, tapi kurang satu hal penting…"] },
+];
+function level3() {
+  let i = 0;
+  function render() {
+    const Q = QUIZ[i];
+    const opts = shuffle([{ t: Q.a, r: true }, ...Q.w.map(t => ({ t, r: false }))]);
+    show(`${hud("Misi 3 · Kuis")}
+      <section class="panel">
+        <span class="qnum">Pertanyaan ${i + 1} dari ${QUIZ.length}</span>
+        <p class="q">${Q.q}</p>
+        <div class="opts">${opts.map((o, k) => `<button class="opt" data-k="${k}">${o.t}</button>`).join("")}</div>
+        <div class="caption" id="cap"></div>
+      </section>`);
+    const cap = document.getElementById("cap"); let locked = false;
+    app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      if (locked || b.classList.contains("wrong")) return;
+      const o = opts[+b.dataset.k];
+      if (o.r) {
+        locked = true; b.classList.add("right"); sfx.good(); cap.style.color = "var(--mint)"; cap.textContent = Q.ok;
+        setTimeout(() => { i++; i < QUIZ.length ? render() : passed("Nilai kuismu: lulus dengan predikat Suami Siaga. Istrimu bangga!"); }, 1100);
+      } else {
+        b.classList.add("wrong"); lives--; refreshHearts(); sfx.bad(); cap.style.color = ""; cap.textContent = pick(Q.no);
+        if (lives <= 0) { locked = true; setTimeout(() => fail("Tiga kali salah. Istrimu sedang mengetik… 📱"), 900); }
+      }
+    });
+  }
+  render();
+}
+
+/* ---------- Level 4: Tombol kabur ---------- */
+function level4() {
+  const LINES = ["Eits! 😝", "Kurang cepat!", "Hampir kena!", "Ayo kejar aku~", "Sabar dong", "Wleee 😛", "Hosh… hosh…", "Capek juga ya…", "Oke oke, sebentar lagi", "Satu lagi deh…"];
+  const NEED = LINES.length;
+  show(`${hud("Misi 4 · Buka Hadiah")}
+    <div class="arena" id="arena"><button class="btn" id="gift">Buka Hadiah 🎁</button></div>
+    <div class="caption" id="cap">Klik tombolnya. Gampang kan?</div>`);
+  const arena = document.getElementById("arena"), gift = document.getElementById("gift"), cap = document.getElementById("cap");
+  let dodges = 0, tired = false;
+  function place(cx) {
+    const aw = arena.clientWidth, ah = arena.clientHeight, bw = gift.offsetWidth, bh = gift.offsetHeight;
+    gift.style.left = cx ? (aw - bw) / 2 + "px" : Math.random() * (aw - bw) + "px";
+    gift.style.top = cx ? (ah - bh) / 2 + "px" : Math.random() * (ah - bh) + "px";
+  }
+  place(true);
+  function dodge(e) {
+    if (tired) return;
+    e.preventDefault();
+    cap.textContent = LINES[dodges]; dodges++; beep(500 + dodges * 60, .07, "square", .05); place(false);
+    if (dodges >= NEED) {
+      tired = true; gift.classList.add("tired"); gift.textContent = "Aku nyerah 😮‍💨 Klik aku";
+      setTimeout(() => place(true), 200); cap.textContent = "Oke, kamu menang. Silakan dibuka.";
+    }
+  }
+  gift.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") dodge(e); });
+  gift.addEventListener("pointerdown", dodge);
+  gift.addEventListener("click", e => { if (!tired) { dodge(e); return; } finale(); });
+}
+
+/* ---------- Final ---------- */
+function finale() {
+  show(`
+    <article class="letter">
+      <div class="big-emoji">🎂🥳🎉</div>
+      <h1>Selamat Ulang Tahun, ${CONFIG.nama}!</h1>
+      ${CONFIG.pesan.map(p => `<p>${p}</p>`).join("")}
+      <p class="sign">Dengan cinta,<br>${CONFIG.dari} 💖</p>
+    </article>
+    <div class="row">
+      <button class="btn" id="song">Putar Lagu 🎵</button>
+      <button class="btn ghost" id="again">Main Lagi</button>
+    </div>`);
+  document.getElementById("song").onclick = () => { ac(); playBirthday(); confetti(); };
+  document.getElementById("again").onclick = start;
+  ac(); playBirthday(); confetti();
+}
+function confetti() {
+  const cv = document.getElementById("confetti"), ctx = cv.getContext("2d");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  cv.hidden = false; const dpr = window.devicePixelRatio || 1;
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ["#ffc94a", "#ff7a8a", "#7fe0c3", "#fff4e3", "#a78bfa"];
+  const ps = Array.from({ length: 180 }, () => ({
+    x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * .6,
+    vx: (Math.random() - .5) * 120, vy: 120 + Math.random() * 180, r: Math.random() * 6,
+    vr: (Math.random() - .5) * 10, w: 6 + Math.random() * 6, h: 10 + Math.random() * 8, c: pick(colors),
+  }));
+  let last = performance.now(), end = last + 6000;
+  (function f(now) {
+    const dt = Math.min(.033, (now - last) / 1000); last = now;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of ps) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.cos(p.r)); ctx.restore();
+    }
+    if (now < end) requestAnimationFrame(f); else { ctx.clearRect(0, 0, innerWidth, innerHeight); cv.hidden = true; }
+  })(last);
+}
+
+start();
+</script>
+</body>
+</html>
